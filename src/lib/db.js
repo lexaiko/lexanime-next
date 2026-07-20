@@ -16,7 +16,44 @@ function getClient() {
   } else {
     if (!localDb) {
       const Database = require('better-sqlite3');
-      const dbPath = path.join(process.cwd(), 'db_anime.db');
+      const fs = require('fs');
+      
+      // Path resolver to locate db_anime.db in serverless/Vercel structures
+      const findDbPath = () => {
+        const root = /*turbopackIgnore: true*/ process.cwd();
+        const candidatePaths = [
+          path.join(root, 'db_anime.db'),
+          path.join(root, 'experiment/python/web_anime/db_anime.db'),
+          path.join(root, '.next/standalone/db_anime.db'),
+          path.join(root, '.next/standalone/experiment/python/web_anime/db_anime.db')
+        ];
+
+        // Also check parent directories relative to this file's output directory
+        try {
+          let curr = __dirname;
+          for (let i = 0; i < 5; i++) {
+            candidatePaths.push(path.join(curr, 'db_anime.db'));
+            curr = path.dirname(curr);
+          }
+        } catch (e) {}
+
+        for (const p of candidatePaths) {
+          if (fs.existsSync(p)) {
+            return p;
+          }
+        }
+
+        // Default fallback
+        return path.join(process.cwd(), 'db_anime.db');
+      };
+
+      const dbPath = findDbPath();
+      
+      console.log('--- DB CONNECTION DEBUG ---');
+      console.log('process.cwd():', process.cwd());
+      console.log('dbPath resolved:', dbPath);
+      console.log('dbPath exists:', fs.existsSync(dbPath));
+      console.log('---------------------------');
       
       const isVercel = process.env.VERCEL === '1' || process.env.NOW_BUILDER === '1';
       const normalizedPath = dbPath.replace(/\\/g, '/');
