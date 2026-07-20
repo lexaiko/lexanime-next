@@ -58,9 +58,17 @@ function getClient() {
       
       const isVercel = process.env.VERCEL === '1' || process.env.NOW_BUILDER === '1';
 
-      localDb = new Database(dbPath, { 
-        readonly: true
-      });
+      if (isVercel) {
+        const normalizedPath = dbPath.replace(/\\/g, '/');
+        localDb = new Database(`file:${normalizedPath}?immutable=1`, {
+          readonly: true,
+          uri: true
+        });
+      } else {
+        localDb = new Database(dbPath, { 
+          readonly: true
+        });
+      }
 
       if (!isVercel) {
         try {
