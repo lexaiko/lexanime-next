@@ -45,7 +45,8 @@ __pycache__/
 *.py[cod]
 
 # Local Database
-db_anime.db*
+db_anime.db-shm
+db_anime.db-wal
 AGENTS.md 
 CLAUDE.md
 
