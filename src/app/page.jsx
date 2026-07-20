@@ -1205,6 +1205,7 @@ export default function App() {
                         allowFullScreen
                         title="LexAnime Player"
                         allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
+                        referrerPolicy="no-referrer"
                       />
                     ) : (
                       <div className="player-empty">
