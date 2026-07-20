@@ -378,6 +378,12 @@ async function run() {
   } catch (err) {
     console.error('\n❌ Gagal sinkronisasi:', err.message);
   } finally {
+    try {
+      console.log('Resetting journal_mode to DELETE for Vercel compatibility...');
+      db.pragma('journal_mode = delete');
+    } catch (e) {
+      console.warn('Failed to reset journal mode:', e.message);
+    }
     db.close();
   }
 }
