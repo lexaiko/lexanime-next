@@ -739,70 +739,15 @@ export default function App() {
                         <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Menghubungkan ke server mirror LexAnime...</p>
                       </div>
                     ) : activeEmbed ? (
-                      (() => {
-                        const isVercelHost = typeof window !== 'undefined' && window.location.hostname.includes('vercel.app');
-                        const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
-                        if (isVercelHost && !forceIframe && !isMobile) {
-                          return (
-                            <div 
-                              className="player-empty" 
-                              style={{ 
-                                cursor: 'pointer', 
-                                background: 'radial-gradient(circle, #1e293b 0%, #0b0f19 100%)', 
-                                border: '2px dashed #38bdf8',
-                                padding: '40px 20px',
-                                display: 'flex',
-                                flexDirection: 'column',
-                                alignItems: 'center',
-                                justifyContent: 'center'
-                              }}
-                              onClick={() => window.open(activeEmbed.link, '_blank')}
-                            >
-                              <div className="player-empty-icon" style={{ color: '#38bdf8', transform: 'scale(1.2)', textShadow: '0 0 15px rgba(56, 189, 248, 0.6)' }}>▶</div>
-                              <p style={{ color: '#f8fafc', fontWeight: 'bold', fontSize: '0.95rem', marginTop: 12, textAlign: 'center' }}>
-                                Klik di Sini untuk Menonton (Rekomendasi)
-                              </p>
-                              <p style={{ color: 'var(--text-muted)', fontSize: '0.75rem', marginTop: 8, padding: '0 20px', textAlign: 'center', lineHeight: '1.4' }}>
-                                Server video kami memblokir pemutaran langsung di web ini jika di-hosting di Vercel. Silakan klik tombol di bawah atau ketuk layar ini untuk menonton di tab baru secara lancar.
-                              </p>
-                              
-                              <div style={{ display: 'flex', gap: 10, marginTop: 15, flexWrap: 'wrap', justifyContent: 'center' }}>
-                                <button 
-                                  className="hero-btn" 
-                                  style={{ padding: '6px 14px', fontSize: '0.75rem', background: '#38bdf8', color: '#0f172a', fontWeight: 'bold', borderRadius: '4px', border: 'none' }}
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    window.open(activeEmbed.link, '_blank');
-                                  }}
-                                >
-                                  Tonton di Tab Baru ↗
-                                </button>
-                                <button
-                                  className="hero-btn-secondary"
-                                  style={{ padding: '6px 14px', fontSize: '0.75rem', borderRadius: '4px', border: '1px solid #475569', color: '#cbd5e1', background: 'transparent' }}
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setForceIframe(true);
-                                  }}
-                                >
-                                  Coba Putar di Web
-                                </button>
-                              </div>
-                            </div>
-                          );
-                        }
-                        return (
-                          <iframe
-                            key={activeEmbed.id}
-                            className="player-iframe"
-                            src={activeEmbed.link}
-                            allowFullScreen
-                            title="LexAnime Player"
-                            allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
-                            referrerPolicy="no-referrer"
-                          />
-                        );
-                      })()
+                      <iframe
+                        key={activeEmbed.id}
+                        className="player-iframe"
+                        src={activeEmbed.link}
+                        allowFullScreen
+                        title="LexAnime Player"
+                        allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
+                        referrerPolicy="no-referrer"
+                      />
                     ) : (
                       <div className="player-empty">
                         <div className="player-empty-icon">▶</div>
