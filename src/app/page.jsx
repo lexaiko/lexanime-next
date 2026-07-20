@@ -741,7 +741,8 @@ export default function App() {
                     ) : activeEmbed ? (
                       (() => {
                         const isVercelHost = typeof window !== 'undefined' && window.location.hostname.includes('vercel.app');
-                        if (isVercelHost && !forceIframe) {
+                        const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+                        if (isVercelHost && !forceIframe && !isMobile) {
                           return (
                             <div 
                               className="player-empty" 
