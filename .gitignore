@@ -1,0 +1,9 @@
+# Ignore Python cache
+__pycache__/
+*.py[cod]
+
+# Ignore Local Database
+db_anime.db
+
+# Ignore Cover Images
+images/
