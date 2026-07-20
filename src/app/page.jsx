@@ -827,6 +827,7 @@ export default function App() {
                     }}>
                       <p><strong>💡 TIPS PEMUTARAN VIDEO:</strong></p>
                       <p style={{ marginTop: '4px' }}>1. <strong>Layar Hitam/Error di Web:</strong> Klik tombol <strong>Tonton Sekarang ↗</strong> di bawah untuk memutar video langsung di tab baru secara lancar.</p>
+                      <p style={{ marginTop: '4px' }}>2. <strong>Hindari Iklan / Redirect Mengganggu:</strong> Gunakan <strong>Brave Browser</strong> atau pasang ekstensi <strong>uBlock Origin</strong> pada browser Anda untuk pengalaman menonton yang bebas iklan.</p>
                     </div>
                   )}
  
