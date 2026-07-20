@@ -56,14 +56,9 @@ function getClient() {
       console.log('---------------------------');
       
       const isVercel = process.env.VERCEL === '1' || process.env.NOW_BUILDER === '1';
-      const normalizedPath = dbPath.replace(/\\/g, '/');
-      const uriPath = isVercel
-        ? `file:${normalizedPath}?immutable=1`
-        : `file:${normalizedPath}`;
 
-      localDb = new Database(uriPath, { 
-        readonly: true,
-        uri: true
+      localDb = new Database(dbPath, { 
+        readonly: true
       });
 
       if (!isVercel) {
