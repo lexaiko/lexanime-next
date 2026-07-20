@@ -46,4 +46,6 @@ __pycache__/
 
 # Local Database
 db_anime.db
+AGENTS.md 
+CLAUDE.md
 

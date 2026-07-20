@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getDb } from '@/lib/db';
+import { queryAll, queryOne } from '@/lib/db';
 import path from 'path';
 
 export async function GET(request, { params }) {
@@ -11,17 +11,15 @@ export async function GET(request, { params }) {
       return NextResponse.json({ error: 'Invalid ID' }, { status: 400 });
     }
 
-    const db = getDb();
-
     // Get anime details
-    const anime_row = db.prepare("SELECT * FROM anime WHERE id = ?").get(anime_id);
+    const anime_row = await queryOne("SELECT * FROM anime WHERE id = ?", [anime_id]);
 
     if (!anime_row) {
       return NextResponse.json({ error: 'Anime not found' }, { status: 404 });
     }
 
     // Get episodes
-    const episode_rows = db.prepare("SELECT * FROM episodes WHERE anime_id = ? ORDER BY id ASC").all(anime_id);
+    const episode_rows = await queryAll("SELECT * FROM episodes WHERE anime_id = ? ORDER BY id ASC", [anime_id]);
 
     const episodes = episode_rows.map(ep => ({
       id: ep.id,

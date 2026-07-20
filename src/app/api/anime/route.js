@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getDb } from '@/lib/db';
+import { queryAll, queryOne } from '@/lib/db';
 import path from 'path';
 
 export async function GET(request) {
@@ -13,8 +13,6 @@ export async function GET(request) {
     const page = parseInt(searchParams.get('page') || '1', 10);
     const limit = parseInt(searchParams.get('limit') || '20', 10);
     const offset = (page - 1) * limit;
-
-    const db = getDb();
 
     const conditions = ["backup_status = 'completed'"];
     const params = [];
@@ -48,12 +46,12 @@ export async function GET(request) {
 
     // Count total items
     const count_sql = `SELECT COUNT(*) as count FROM anime ${where_clause}`;
-    const countResult = db.prepare(count_sql).get(...params);
+    const countResult = await queryOne(count_sql, params);
     const total_items = countResult ? countResult.count : 0;
 
     // Get items
     const select_sql = `SELECT * FROM anime ${where_clause} ORDER BY ${order_by} LIMIT ? OFFSET ?`;
-    const rows = db.prepare(select_sql).all(...params, limit, offset);
+    const rows = await queryAll(select_sql, [...params, limit, offset]);
 
     const anime_list = rows.map(row => ({
       id: row.id,

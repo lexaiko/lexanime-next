@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getDb } from '@/lib/db';
+import { queryAll } from '@/lib/db';
 
 export async function GET(request, { params }) {
   try {
@@ -10,10 +10,8 @@ export async function GET(request, { params }) {
       return NextResponse.json({ error: 'Invalid ID' }, { status: 400 });
     }
 
-    const db = getDb();
-
     // Get embeds
-    const rows = db.prepare("SELECT * FROM embeds WHERE episode_id = ? ORDER BY id ASC").all(episode_id);
+    const rows = await queryAll("SELECT * FROM embeds WHERE episode_id = ? ORDER BY id ASC", [episode_id]);
 
     const embeds = rows.map(row => ({
       id: row.id,
