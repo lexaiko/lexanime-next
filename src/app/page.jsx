@@ -690,13 +690,19 @@ function CatalogScreen({ searchQ, setSearchQ, setSearchInput, filterGenre, setFi
 /* ── Main App Container Component ─────────────────────── */
 export default function App() {
   /* Theme State */
-  const [theme, setTheme] = useState(() => {
-    try { return localStorage.getItem('lex_theme') || 'dark'; } catch { return 'dark'; }
-  });
+  const [theme, setTheme] = useState('dark');
+
+  useEffect(() => {
+    // Hydrate theme from localStorage on client mount
+    try {
+      const saved = localStorage.getItem('lex_theme');
+      if (saved) setTheme(saved);
+    } catch {}
+  }, []);
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('lex_theme', theme);
+    try { localStorage.setItem('lex_theme', theme); } catch {}
   }, [theme]);
 
   const toggleTheme = () => setTheme(t => t === 'dark' ? 'light' : 'dark');
@@ -754,12 +760,18 @@ export default function App() {
   const [embedLoading, setEmbedLoading]   = useState(false);
 
   /* Local storage state */
-  const [bookmarks, setBookmarks]     = useState(() => {
-    try { return JSON.parse(localStorage.getItem('lex_bookmarks') || '[]'); } catch { return []; }
-  });
-  const [history, setHistory]         = useState(() => {
-    try { return JSON.parse(localStorage.getItem('lex_history') || '[]'); } catch { return []; }
-  });
+  const [bookmarks, setBookmarks] = useState([]);
+  const [history, setHistory]     = useState([]);
+
+  useEffect(() => {
+    // Hydrate bookmarks and history from localStorage on client mount
+    try {
+      const savedBookmarks = JSON.parse(localStorage.getItem('lex_bookmarks') || '[]');
+      const savedHistory   = JSON.parse(localStorage.getItem('lex_history')   || '[]');
+      if (savedBookmarks.length) setBookmarks(savedBookmarks);
+      if (savedHistory.length)   setHistory(savedHistory);
+    } catch {}
+  }, []);
 
   /* Toast */
   const [toast, setToast]             = useState('');
@@ -771,8 +783,8 @@ export default function App() {
     toastTimer.current = setTimeout(() => setToast(''), 2500);
   }, []);
 
-  useEffect(() => { localStorage.setItem('lex_bookmarks', JSON.stringify(bookmarks)); }, [bookmarks]);
-  useEffect(() => { localStorage.setItem('lex_history', JSON.stringify(history)); }, [history]);
+  useEffect(() => { try { localStorage.setItem('lex_bookmarks', JSON.stringify(bookmarks)); } catch {} }, [bookmarks]);
+  useEffect(() => { try { localStorage.setItem('lex_history',   JSON.stringify(history));   } catch {} }, [history]);
 
   useEffect(() => {
     (async () => {
