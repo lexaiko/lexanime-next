@@ -17,9 +17,26 @@ function getClient() {
     if (!localDb) {
       const Database = require('better-sqlite3');
       const dbPath = path.join(process.cwd(), 'db_anime.db');
-      localDb = new Database(dbPath, { readonly: true });
-      localDb.pragma('journal_mode = WAL');
-      localDb.pragma('synchronous = NORMAL');
+      
+      const isVercel = process.env.VERCEL === '1' || process.env.NOW_BUILDER === '1';
+      const normalizedPath = dbPath.replace(/\\/g, '/');
+      const uriPath = isVercel
+        ? `file:${normalizedPath}?immutable=1`
+        : `file:${normalizedPath}`;
+
+      localDb = new Database(uriPath, { 
+        readonly: true,
+        uri: true
+      });
+
+      if (!isVercel) {
+        try {
+          localDb.pragma('journal_mode = WAL');
+          localDb.pragma('synchronous = NORMAL');
+        } catch (e) {
+          console.warn('Failed to set WAL/synchronous pragmas:', e.message);
+        }
+      }
     }
     return { type: 'local', client: localDb };
   }
