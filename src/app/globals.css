@@ -1734,3 +1734,61 @@ option { background: var(--liquid-glass-solid); color: var(--text-main); }
     border-radius: 4px;
   }
 }
+
+/* ── Schedule & Popular Rankings CSS ── */
+.schedule-day-card {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease, border-color 0.3s ease;
+}
+.schedule-day-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4), 0 0 20px rgba(56, 189, 248, 0.15);
+  border-color: var(--accent-blue) !important;
+}
+
+.schedule-anime-row {
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+.schedule-anime-row:hover {
+  background-color: var(--liquid-glass-hover);
+  transform: translateX(4px);
+}
+.schedule-anime-row:hover .schedule-anime-title {
+  color: var(--accent-blue) !important;
+}
+
+/* Rank Badge Overlay */
+.rank-badge {
+  position: absolute;
+  top: -8px;
+  left: -8px;
+  z-index: 10;
+  padding: 4px 10px;
+  border-radius: 99px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.rank-badge.rank-1 {
+  border-color: #fbbf24;
+  color: #fbbf24;
+  text-shadow: 0 0 8px rgba(251, 191, 36, 0.5);
+  background: rgba(251, 191, 36, 0.15);
+}
+
+.rank-badge.rank-2 {
+  border-color: #e2e8f0;
+  color: #f1f5f9;
+  text-shadow: 0 0 8px rgba(226, 232, 240, 0.5);
+  background: rgba(226, 232, 240, 0.15);
+}
+
+.rank-badge.rank-3 {
+  border-color: #ea580c;
+  color: #fdba74;
+  text-shadow: 0 0 8px rgba(234, 88, 12, 0.5);
+  background: rgba(234, 88, 12, 0.15);
+}

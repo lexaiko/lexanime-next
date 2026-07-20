@@ -1,691 +1,14 @@
 'use client';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { Ic } from '../components/Icons';
+import { Header } from '../components/Header';
+import { Sidebar } from '../components/Sidebar';
+import { HomeScreen } from '../components/HomeScreen';
+import { CatalogScreen } from '../components/CatalogScreen';
+import { ScheduleScreen } from '../components/ScheduleScreen';
+import { AnimeCard } from '../components/AnimeCard';
+import { API_BASE, imgSrc, makeSlug } from '../lib/utils';
 
-const API_BASE = "";
-
-/* ── Inline SVG Icons ─────────────────────────────────── */
-const Ic = {
-  home: (
-    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
-    </svg>
-  ),
-  compass: (
-    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>
-    </svg>
-  ),
-  calendar: (
-    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
-    </svg>
-  ),
-  bookmark: (filled) => (
-    <svg width="17" height="17" viewBox="0 0 24 24" fill={filled ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/>
-    </svg>
-  ),
-  clock: (
-    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 16 14"/>
-    </svg>
-  ),
-  download: (
-    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
-    </svg>
-  ),
-  shield: (
-    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-    </svg>
-  ),
-  settings: (
-    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M4.93 19.07l1.41-1.41M12 2v2M12 20v2M2 12h2M20 12h2"/>
-    </svg>
-  ),
-  search: (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-    </svg>
-  ),
-  play: (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-      <polygon points="5 3 19 12 5 21 5 3"/>
-    </svg>
-  ),
-  star: (
-    <svg width="12" height="12" viewBox="0 0 24 24" fill="#fbbf24">
-      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-    </svg>
-  ),
-  chevronDown: (
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-      <polyline points="6 9 12 15 18 9"/>
-    </svg>
-  ),
-  chevronRight: (
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-      <polyline points="9 18 15 12 9 6"/>
-    </svg>
-  ),
-  list: (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-      <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
-      <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
-    </svg>
-  ),
-  share: (
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
-      <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
-    </svg>
-  ),
-  close: (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-      <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-    </svg>
-  ),
-  trash: (
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/>
-    </svg>
-  ),
-  sun: (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-    </svg>
-  ),
-  moon: (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
-    </svg>
-  ),
-  filter: (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
-    </svg>
-  ),
-  menu: (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/>
-    </svg>
-  )
-};
-
-/* ── Helpers ──────────────────────────────────────────── */
-const imgSrc = (path) =>
-  path ? `${API_BASE}/images/${path}` : 'https://placehold.co/155x220/1f293d/38bdf8?text=No+Cover';
-
-const getDayName = () => {
-  const days = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
-  return days[new Date().getDay()];
-};
-
-/* Expanded 30+ Genres List */
-const allGenres = [
-  'Action', 'Adventure', 'Comedy', 'Drama', 'Ecchi', 'Fantasy', 'Harem', 
-  'Historical', 'Horror', 'Isekai', 'Josei', 'Martial Arts', 'Mecha', 'Military', 
-  'Music', 'Mystery', 'Parody', 'Psychological', 'Romance', 'School', 'Sci-Fi', 
-  'Seinen', 'Shoujo', 'Shounen', 'Slice of Life', 'Sports', 'Super Power', 
-  'Supernatural', 'Thriller', 'Vampire'
-];
-
-/* ── AnimeCard Component (Top-Level) ──────────────────── */
-function AnimeCard({ anime, onClick }) {
-  return (
-    <div className="anime-card" onClick={() => onClick(anime.id)}>
-      <div className="card-thumb">
-        <img
-          src={imgSrc(anime.image_path)}
-          alt={anime.judul}
-          loading="lazy"
-          onError={(e) => { e.target.src = 'https://placehold.co/155x220/1f293d/38bdf8?text=No+Cover'; }}
-        />
-        {anime.total_episode && anime.total_episode !== 'Unknown' && (
-          <span className="card-ep-badge">Ep {anime.total_episode}</span>
-        )}
-        {anime.status === 'Ongoing' && (
-          <span className="card-day-badge">{getDayName()}</span>
-        )}
-        {anime.skor && anime.skor !== 'N/A' && (
-          <span className="card-score-badge">
-            {Ic.star} {anime.skor}
-          </span>
-        )}
-        <div className="card-overlay">
-          <div className="card-play-btn">{Ic.play}</div>
-        </div>
-      </div>
-      <div className="card-body">
-        <div className="card-title" title={anime.judul}>{anime.judul}</div>
-        <div className="card-sub">{anime.studio || 'Unknown Studio'}</div>
-      </div>
-    </div>
-  );
-}
-
-/* ── Top Header Component (With Mobile Menu Button) ── */
-function Header({ searchInput, setSearchInput, handleSearchSubmit, handleSearchClear, theme, toggleTheme, toggleMobileSidebar }) {
-  return (
-    <header className="top-header">
-      <button className="mobile-menu-btn" type="button" onClick={toggleMobileSidebar} title="Menu Navigasi">
-        {Ic.menu}
-      </button>
-
-      <div className="search-bar">
-        <span className="search-bar-icon">{Ic.search}</span>
-        <form onSubmit={handleSearchSubmit}>
-          <input
-            type="text"
-            placeholder="Cari anime di LexAnime..."
-            value={searchInput}
-            onChange={e => setSearchInput(e.target.value)}
-          />
-        </form>
-        {searchInput && (
-          <button className="search-clear-btn" type="button" onClick={handleSearchClear}>
-            {Ic.close}
-          </button>
-        )}
-      </div>
-
-      <div className="header-actions">
-        <button 
-          className="theme-toggle-btn" 
-          onClick={toggleTheme}
-          title={theme === 'dark' ? 'Ganti ke Light Mode' : 'Ganti ke Dark Mode'}
-          type="button"
-        >
-          {theme === 'dark' ? Ic.sun : Ic.moon}
-        </button>
-
-        <button className="btn-header btn-ghost" type="button">Log in</button>
-        <button className="btn-header btn-primary" type="button">Register</button>
-      </div>
-    </header>
-  );
-}
-
-/* ── Sidebar Component (Clean & Redesigned) ────────────── */
-function Sidebar({ screen, setScreen, jelajahiOpen, setJelajahiOpen, jadwalOpen, setJadwalOpen, filterGenre, setFilterGenre, setSearchQ, setFilterStatus, setFilterType, mobileOpen, closeMobileSidebar }) {
-  const handleNav = (action) => {
-    action();
-    closeMobileSidebar();
-  };
-
-  return (
-    <>
-      <div className={`sidebar-backdrop ${mobileOpen ? 'mobile-open' : ''}`} onClick={closeMobileSidebar} />
-
-      <aside className={`sidebar ${mobileOpen ? 'mobile-open' : ''}`}>
-        <div className="sidebar-logo" onClick={() => handleNav(() => { setScreen('home'); window.scrollTo({ top: 0, behavior: 'smooth' }); })}>
-          <div className="sidebar-logo-icon">🍿</div>
-          <div className="sidebar-logo-text">Lex<em>anime</em></div>
-        </div>
-
-        <div className="sidebar-section-label">Menu Utama</div>
-        <nav className="sidebar-nav">
-          <div className={`nav-item ${screen === 'home' ? 'active' : ''}`} onClick={() => handleNav(() => { setScreen('home'); window.scrollTo({ top: 0, behavior: 'smooth' }); })}>
-            {Ic.home} <span>Beranda</span>
-          </div>
-
-          <div
-            className={`nav-item ${jelajahiOpen || screen === 'catalog' ? 'expanded' : ''}`}
-            onClick={() => setJelajahiOpen(o => !o)}
-          >
-            {Ic.compass} <span style={{ flex: 1 }}>Jelajahi Genre</span>
-            <span className="nav-item-arrow">{Ic.chevronDown}</span>
-          </div>
-          {jelajahiOpen && (
-            <div className="nav-sub">
-              {['Action','Comedy','Fantasy','Romance','Isekai','Sci-Fi'].map(g => (
-                <div
-                  key={g}
-                  className={`nav-sub-item ${filterGenre === g && screen === 'catalog' ? 'active' : ''}`}
-                  onClick={() => handleNav(() => { setFilterGenre(g); setSearchQ(''); setFilterStatus(''); setFilterType(''); setScreen('catalog'); window.scrollTo({ top: 0, behavior: 'smooth' }); })}
-                >
-                  {g}
-                </div>
-              ))}
-            </div>
-          )}
-
-          <div
-            className={`nav-item ${jadwalOpen ? 'expanded' : ''}`}
-            onClick={() => setJadwalOpen(o => !o)}
-          >
-            {Ic.calendar} <span style={{ flex: 1 }}>Jadwal Tayang</span>
-            <span className="nav-item-arrow">{Ic.chevronDown}</span>
-          </div>
-          {jadwalOpen && (
-            <div className="nav-sub">
-              {['Senin','Selasa','Rabu','Kamis','Jumat','Sabtu','Minggu'].map(d => (
-                <div key={d} className="nav-sub-item" onClick={() => handleNav(() => { setFilterStatus('Ongoing'); setScreen('catalog'); window.scrollTo({ top: 0, behavior: 'smooth' }); })}>
-                  {d}
-                </div>
-              ))}
-            </div>
-          )}
-        </nav>
-
-        <div className="sidebar-divider" />
-
-        <div className="sidebar-section-label">Koleksi Saya</div>
-        <nav className="sidebar-nav">
-          <div
-            className={`nav-item ${screen === 'bookmarks' ? 'active' : ''}`}
-            onClick={() => handleNav(() => { setScreen('bookmarks'); window.scrollTo({ top: 0, behavior: 'smooth' }); })}
-          >
-            {Ic.bookmark(screen === 'bookmarks')} <span>Bookmark</span>
-          </div>
-          <div
-            className={`nav-item ${screen === 'history' ? 'active' : ''}`}
-            onClick={() => handleNav(() => { setScreen('history'); window.scrollTo({ top: 0, behavior: 'smooth' }); })}
-          >
-            {Ic.clock} <span>Riwayat Tonton</span>
-          </div>
-        </nav>
-      </aside>
-    </>
-  );
-}
-
-/* ── Compact Netflix Billboard Jumbotron Hero Component ── */
-function NetflixJumbotronHero({ ongoingList, heroIndex, setHeroIndex, heroTimer, openDetail, toggleBookmark, isBookmarked }) {
-  const slides = ongoingList.slice(0, 5);
-  if (slides.length === 0) return null;
-
-  const currentAnime = slides[heroIndex] || slides[0];
-
-  return (
-    <div className="jumbotron-hero-wrap">
-      {slides.map((anime, i) => (
-        <div
-          key={anime.id}
-          className={`jumbotron-slide ${i === heroIndex ? 'active' : ''}`}
-          style={{
-            backgroundImage: anime.image_path
-              ? `url(${API_BASE}/images/${anime.image_path})`
-              : 'linear-gradient(135deg, #1f293d 0%, #0b0f19 100%)'
-          }}
-        >
-          <div className="jumbotron-gradient" />
-        </div>
-      ))}
-
-      <div className="jumbotron-content">
-        <div className="jumbotron-poster-row">
-          <img
-            src={imgSrc(currentAnime.image_path)}
-            alt={currentAnime.judul}
-            className="jumbotron-poster-img"
-            onClick={() => openDetail(currentAnime.id)}
-            onError={(e) => { e.target.src = 'https://placehold.co/155x220/1f293d/38bdf8?text=No+Cover'; }}
-          />
-
-          <div className="jumbotron-text-group">
-            <div className="hero-badges">
-              {currentAnime.total_episode && currentAnime.total_episode !== 'Unknown' && (
-                <span className="hero-badge badge-blue">Episodes: {currentAnime.total_episode}</span>
-              )}
-              {currentAnime.status && (
-                <span className="hero-badge badge-green">{currentAnime.status}</span>
-              )}
-              {currentAnime.skor && currentAnime.skor !== 'N/A' && (
-                <span className="hero-badge badge-blue" style={{ display: 'flex', alignItems: 'center', gap: '3px', color: '#fbbf24' }}>
-                  {Ic.star} {currentAnime.skor}
-                </span>
-              )}
-            </div>
-
-            <h1 className="jumbotron-title" onClick={() => openDetail(currentAnime.id)}>
-              {currentAnime.judul}
-            </h1>
-
-            <p className="jumbotron-synopsis">
-              {currentAnime.sinopsis || "Saksikan tayangan anime terbaru dengan subtitle Indonesia dan kualitas streaming terbaik hanya di LexAnime."}
-            </p>
-
-            <div className="jumbotron-btn-group">
-              <button className="hero-btn" type="button" onClick={() => openDetail(currentAnime.id)}>
-                {Ic.play} Tonton Sekarang
-              </button>
-              <button 
-                className={`hero-btn-secondary ${isBookmarked(currentAnime.id) ? 'bookmarked' : ''}`} 
-                type="button"
-                onClick={() => toggleBookmark(currentAnime)}
-              >
-                {Ic.bookmark(isBookmarked(currentAnime.id))} 
-                <span>{isBookmarked(currentAnime.id) ? 'Disimpan' : 'Bookmark'}</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="jumbotron-dots">
-        {slides.map((_, i) => (
-          <div
-            key={i}
-            className={`hero-dot ${i === heroIndex ? 'active' : ''}`}
-            onClick={() => { setHeroIndex(i); clearInterval(heroTimer.current); }}
-          />
-        ))}
-      </div>
-    </div>
-  );
-}
-
-/* ── Shelf Component (Top-Level) ───────────────────────── */
-function Shelf({ title, list, openDetail, setScreen }) {
-  if (list.length === 0) return null;
-  return (
-    <div className="section-block">
-      <div className="section-header">
-        <div className="section-title">
-          <div className="section-title-bar" />
-          {title}
-        </div>
-        <div className="section-see-all" onClick={() => { setScreen('catalog'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
-          Lihat Semua {Ic.chevronRight}
-        </div>
-      </div>
-      <div className="cards-row">
-        {list.map(a => <AnimeCard key={a.id} anime={a} onClick={openDetail} />)}
-      </div>
-    </div>
-  );
-}
-
-/* ── HomeScreen Component (Top-Level) ─────────────────── */
-function HomeScreen({ ongoingList, topList, exploreItems, exploreLoading, exploreHasMore, loadNextExplorePage, heroIndex, setHeroIndex, heroTimer, openDetail, toggleBookmark, isBookmarked, setScreen }) {
-  return (
-    <div>
-      <NetflixJumbotronHero 
-        ongoingList={ongoingList} 
-        heroIndex={heroIndex} 
-        setHeroIndex={setHeroIndex} 
-        heroTimer={heroTimer} 
-        openDetail={openDetail} 
-        toggleBookmark={toggleBookmark} 
-        isBookmarked={isBookmarked} 
-      />
-      <Shelf title="Ongoing Anime" list={ongoingList} openDetail={openDetail} setScreen={setScreen} />
-      <Shelf title="Koleksi Terpopuler" list={topList} openDetail={openDetail} setScreen={setScreen} />
-
-      <section className="section-block" style={{ marginTop: '1.5rem' }}>
-        <div className="section-header">
-          <div className="section-title">
-            <div className="section-title-bar" />
-            Jelajahi Anime
-          </div>
-        </div>
-
-        <div className="anime-grid" style={{ padding: '12px 0' }}>
-          {exploreItems.map((anime, idx) => (
-            <AnimeCard key={`${anime.id}-${idx}`} anime={anime} onClick={openDetail} />
-          ))}
-        </div>
-
-        <div className="lazy-loading-spinner-row">
-          {exploreLoading && (
-            <>
-              <div className="spinner" />
-              <p>Memuat anime lainnya...</p>
-            </>
-          )}
-
-          {!exploreLoading && exploreHasMore && (
-            <button className="hero-btn-secondary" type="button" onClick={loadNextExplorePage} style={{ marginTop: '8px' }}>
-              Muat Lebih Banyak Anime ({exploreItems.length} ditampilkan)
-            </button>
-          )}
-
-          {!exploreHasMore && exploreItems.length > 0 && (
-            <p style={{ color: 'var(--text-dim)', fontSize: '0.82rem' }}>
-              ✓ Semua koleksi anime ({exploreItems.length}) telah ditampilkan.
-            </p>
-          )}
-        </div>
-      </section>
-    </div>
-  );
-}
-
-/* ── CatalogScreen Component (With Toggle Drawer Filterization & Infinite Scroll) ── */
-function CatalogScreen({ searchQ, setSearchQ, setSearchInput, filterGenre, setFilterGenre, filterStatus, setFilterStatus, filterType, setFilterType, filterSort, setFilterSort, openDetail }) {
-  const [showFilterDrawer, setShowFilterDrawer] = useState(false);
-  const [catalogItems, setCatalogItems]         = useState([]);
-  const [catalogPage, setCatalogPage]           = useState(1);
-  const [catalogHasMore, setCatalogHasMore]     = useState(true);
-  const [catalogLoading, setCatalogLoading]     = useState(false);
-
-  const isCatalogLoadingRef = useRef(false);
-  const catalogHasMoreRef   = useRef(true);
-  const catalogPageRef      = useRef(1);
-
-  useEffect(() => { isCatalogLoadingRef.current = catalogLoading; }, [catalogLoading]);
-  useEffect(() => { catalogHasMoreRef.current = catalogHasMore; }, [catalogHasMore]);
-  useEffect(() => { catalogPageRef.current = catalogPage; }, [catalogPage]);
-
-  const fetchInitialCatalog = useCallback(async () => {
-    setCatalogLoading(true);
-    isCatalogLoadingRef.current = true;
-    try {
-      const p = new URLSearchParams({ page: 1, limit: 24 });
-      if (searchQ) p.set('q', searchQ);
-      if (filterGenre) p.set('genre', filterGenre);
-      if (filterStatus) p.set('status', filterStatus);
-      if (filterType) p.set('type', filterType);
-      if (filterSort) p.set('sort', filterSort);
-
-      const res = await fetch(`${API_BASE}/api/anime?${p}`);
-      const data = await res.json();
-      const items = data.data || [];
-      
-      setCatalogItems(items);
-      setCatalogPage(1);
-      catalogPageRef.current = 1;
-
-      const hasMore = 1 < (data.total_pages || 1);
-      setCatalogHasMore(hasMore);
-      catalogHasMoreRef.current = hasMore;
-    } catch (e) {
-      console.error("Error fetching initial catalog:", e);
-    } finally {
-      setCatalogLoading(false);
-      isCatalogLoadingRef.current = false;
-    }
-  }, [searchQ, filterGenre, filterStatus, filterType, filterSort]);
-
-  useEffect(() => {
-    fetchInitialCatalog();
-  }, [fetchInitialCatalog]);
-
-  const loadNextCatalogPage = useCallback(async () => {
-    if (isCatalogLoadingRef.current || !catalogHasMoreRef.current) return;
-
-    isCatalogLoadingRef.current = true;
-    setCatalogLoading(true);
-
-    try {
-      const nextPage = catalogPageRef.current + 1;
-      const p = new URLSearchParams({ page: nextPage, limit: 24 });
-      if (searchQ) p.set('q', searchQ);
-      if (filterGenre) p.set('genre', filterGenre);
-      if (filterStatus) p.set('status', filterStatus);
-      if (filterType) p.set('type', filterType);
-      if (filterSort) p.set('sort', filterSort);
-
-      const res = await fetch(`${API_BASE}/api/anime?${p}`);
-      const data = await res.json();
-      const newItems = data.data || [];
-
-      if (newItems.length > 0) {
-        setCatalogItems(prev => [...prev, ...newItems]);
-        setCatalogPage(nextPage);
-        catalogPageRef.current = nextPage;
-
-        const hasMore = nextPage < (data.total_pages || 1);
-        setCatalogHasMore(hasMore);
-        catalogHasMoreRef.current = hasMore;
-      } else {
-        setCatalogHasMore(false);
-        catalogHasMoreRef.current = false;
-      }
-    } catch (e) {
-      console.error("Error loading next catalog page:", e);
-    } finally {
-      setCatalogLoading(false);
-      isCatalogLoadingRef.current = false;
-    }
-  }, [searchQ, filterGenre, filterStatus, filterType, filterSort]);
-
-  useEffect(() => {
-    const onScroll = () => {
-      if (isCatalogLoadingRef.current || !catalogHasMoreRef.current) return;
-      const windowHeight = window.innerHeight;
-      const scrollY = window.scrollY || window.pageYOffset;
-      const bodyHeight = document.documentElement.scrollHeight;
-
-      if (windowHeight + scrollY >= bodyHeight - 600) {
-        loadNextCatalogPage();
-      }
-    };
-
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
-  }, [loadNextCatalogPage]);
-
-  const hasFilters = searchQ || filterGenre || filterStatus || filterType || filterSort !== 'latest';
-
-  return (
-    <div className="filter-container">
-      <div 
-        className="filter-toggle-bar" 
-        onClick={() => setShowFilterDrawer(o => !o)}
-      >
-        <div className="filter-toggle-title">
-          {Ic.filter} Filter & Genre
-          {hasFilters && (
-            <div className="filter-active-pills">
-              {filterGenre && <span className="filter-active-pill">{filterGenre}</span>}
-              {filterStatus && <span className="filter-active-pill">{filterStatus}</span>}
-              {filterType && <span className="filter-active-pill">{filterType}</span>}
-            </div>
-          )}
-        </div>
-        <span style={{ transform: showFilterDrawer ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s', display: 'flex' }}>
-          {Ic.chevronDown}
-        </span>
-      </div>
-
-      {showFilterDrawer && (
-        <div className="filter-panel-glass">
-          <div className="filter-row">
-            <span className="filter-label">Genre:</span>
-            <div className="genre-pills-scroll">
-              <div 
-                className={`filter-pill ${filterGenre === '' ? 'active' : ''}`} 
-                onClick={() => setFilterGenre('')}
-              >
-                Semua
-              </div>
-              {allGenres.map(g => (
-                <div 
-                  key={g} 
-                  className={`filter-pill ${filterGenre === g ? 'active' : ''}`} 
-                  onClick={() => setFilterGenre(g)}
-                >
-                  {g}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="filter-row filter-selects-row">
-            <span className="filter-label">Status & Tipe:</span>
-            <select className="filter-select" value={filterStatus} onChange={e => setFilterStatus(e.target.value)}>
-              <option value="">Semua Status</option>
-              <option value="Ongoing">Ongoing</option>
-              <option value="Completed">Completed</option>
-              <option value="Drop">Drop</option>
-            </select>
-
-            <select className="filter-select" value={filterType} onChange={e => setFilterType(e.target.value)}>
-              <option value="">Semua Tipe</option>
-              <option value="TV">TV Series</option>
-              <option value="Movie">Movie</option>
-              <option value="OVA">OVA</option>
-              <option value="ONA">ONA</option>
-              <option value="BD">BD</option>
-              <option value="Special">Special</option>
-            </select>
-
-            <select className="filter-select" value={filterSort} onChange={e => setFilterSort(e.target.value)}>
-              <option value="latest">Urutkan: Terbaru</option>
-              <option value="rating">Urutkan: Rating Tertinggi</option>
-              <option value="title">Urutkan: Judul (A-Z)</option>
-            </select>
-
-            {hasFilters && (
-              <button className="clear-filters-btn" type="button" onClick={() => {
-                setFilterGenre(''); setFilterStatus(''); setFilterType(''); setFilterSort('latest'); setSearchQ(''); setSearchInput('');
-              }}>
-                Hapus Filter
-              </button>
-            )}
-          </div>
-        </div>
-      )}
-
-      <div className="catalog-title" style={{ padding: '8px 0 4px 0', fontSize: '1.05rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8 }}>
-        <div className="section-title-bar" />
-        {searchQ ? `Pencarian: "${searchQ}"` : 'Katalog Anime Complete'}
-      </div>
-
-      {catalogItems.length === 0 && catalogLoading ? (
-        <div className="status-center"><div className="spinner" /><div className="status-text">Memuat katalog anime...</div></div>
-      ) : catalogItems.length === 0 && !catalogLoading ? (
-        <div className="status-center">
-          <div className="status-icon">📭</div>
-          <div className="status-text">Tidak ada anime yang cocok dengan filter pencarian ini.</div>
-        </div>
-      ) : (
-        <>
-          <div className="anime-grid" style={{ padding: '12px 0' }}>
-            {catalogItems.map((a, idx) => (
-              <AnimeCard key={`${a.id}-${idx}`} anime={a} onClick={openDetail} />
-            ))}
-          </div>
-
-          <div className="lazy-loading-spinner-row">
-            {catalogLoading && (
-              <>
-                <div className="spinner" />
-                <p>Memuat anime lainnya...</p>
-              </>
-            )}
-
-            {!catalogLoading && catalogHasMore && (
-              <button className="hero-btn-secondary" type="button" onClick={loadNextCatalogPage} style={{ marginTop: '8px' }}>
-                Muat Lebih Banyak Anime ({catalogItems.length} ditampilkan)
-              </button>
-            )}
-
-            {!catalogHasMore && catalogItems.length > 0 && (
-              <p style={{ color: 'var(--text-dim)', fontSize: '0.82rem' }}>
-                ✓ Semua hasil pencarian ({catalogItems.length}) telah ditampilkan.
-              </p>
-            )}
-          </div>
-        </>
-      )}
-    </div>
-  );
-}
 
 /* ── Main App Container Component ─────────────────────── */
 export default function App() {
@@ -723,6 +46,7 @@ export default function App() {
   const [filterStatus, setFilterStatus] = useState('');
   const [filterType, setFilterType]     = useState('');
   const [filterSort, setFilterSort]     = useState('latest');
+  const [filterDay, setFilterDay]       = useState('');
 
   /* Sidebar collapse states */
   const [jelajahiOpen, setJelajahiOpen] = useState(false);
@@ -758,6 +82,8 @@ export default function App() {
   const [embeds, setEmbeds]               = useState([]);
   const [activeEmbed, setActiveEmbed]     = useState(null);
   const [embedLoading, setEmbedLoading]   = useState(false);
+  const [forceIframe, setForceIframe]     = useState(false);
+  const [hasHydratedUrl, setHasHydratedUrl] = useState(false);
 
   /* Local storage state */
   const [bookmarks, setBookmarks] = useState([]);
@@ -807,6 +133,173 @@ export default function App() {
         console.error("Error fetching shelf data:", e);
       }
     })();
+  }, []);
+
+  // URL parameters hydration on mount / pathname change
+  const hydrateFromUrl = useCallback(async () => {
+    if (typeof window === 'undefined') return;
+
+    const pathname = window.location.pathname; // e.g. "/anime/12-high-school-dxd"
+    if (!pathname || pathname === '/') {
+      setScreen('home');
+      setHasHydratedUrl(true);
+      return;
+    }
+
+    const parts = pathname.replace(/^\//, '').split('/');
+    const mainRoute = parts[0]; // "anime", "watch", "bookmarks", "history", "catalog", "ongoing", "popular", "schedule"
+
+    if (mainRoute === 'bookmarks') {
+      setScreen('bookmarks');
+    } else if (mainRoute === 'history') {
+      setScreen('history');
+    } else if (mainRoute === 'ongoing') {
+      setScreen('ongoing');
+    } else if (mainRoute === 'popular') {
+      setScreen('popular');
+    } else if (mainRoute === 'schedule') {
+      setScreen('schedule');
+    } else if (mainRoute === 'catalog') {
+      setScreen('catalog');
+      if (parts[1]) {
+        if (parts[1].startsWith('day-')) {
+          const day = parts[1].replace('day-', '');
+          setFilterDay(day);
+          setFilterGenre('');
+          setFilterStatus('Ongoing');
+        } else if (parts[1].startsWith('genre-')) {
+          const genre = parts[1].replace('genre-', '');
+          setFilterGenre(genre);
+          setFilterDay('');
+          setFilterStatus('');
+        }
+      } else {
+        setFilterDay('');
+        setFilterGenre('');
+        setFilterStatus('');
+      }
+    } else if (mainRoute === 'anime' && parts[1]) {
+      // e.g. "12-high-school-dxd"
+      const slugParts = parts[1].split('-');
+      const animeId = slugParts[0];
+      if (animeId) {
+        setDetailLoading(true);
+        setScreen('detail');
+        setActiveEpisode(null);
+        setEmbeds([]);
+        setActiveEmbed(null);
+        try {
+          const res = await fetch(`${API_BASE}/api/anime/${animeId}`);
+          if (res.ok) {
+            const data = await res.json();
+            setDetailAnime(data);
+            setEpisodes(data.episodes || []);
+          }
+        } catch (e) {
+          console.error("Error loading anime detail from Pathname:", e);
+        } finally {
+          setDetailLoading(false);
+        }
+      }
+    } else if (mainRoute === 'watch' && parts[1] && parts[2]) {
+      // e.g. parts[1] = "12-high-school-dxd", parts[2] = "ep-2"
+      const animeSlugParts = parts[1].split('-');
+      const animeId = animeSlugParts[0];
+      
+      const epSlugParts = parts[2].split('-');
+      const epId = epSlugParts[1] || epSlugParts[0]; // handles "ep-2" -> "2" or just "2"
+      
+      if (animeId && epId) {
+        setDetailLoading(true);
+        setEmbedLoading(true);
+        setScreen('player');
+        try {
+          const animeRes = await fetch(`${API_BASE}/api/anime/${animeId}`);
+          if (animeRes.ok) {
+            const animeData = await animeRes.json();
+            setDetailAnime(animeData);
+            const eps = animeData.episodes || [];
+            setEpisodes(eps);
+            
+            // Try to find by index first (e.g. ep-2 -> index 1)
+            const parsedIdx = parseInt(epId, 10);
+            let epObj = null;
+            if (!isNaN(parsedIdx) && parsedIdx > 0 && parsedIdx <= eps.length) {
+              epObj = eps[parsedIdx - 1];
+            } else {
+              // Fallback to database ID
+              epObj = eps.find(e => String(e.id) === String(epId));
+            }
+
+            if (epObj) {
+              setActiveEpisode(epObj);
+              const embRes = await fetch(`${API_BASE}/api/episodes/${epObj.id}/embeds`);
+              if (embRes.ok) {
+                const embData = await embRes.json();
+                setEmbeds(embData || []);
+                if (embData && embData.length > 0) {
+                  setActiveEmbed(embData[0]);
+                }
+              }
+            }
+          }
+        } catch (e) {
+          console.error("Error loading player from Pathname:", e);
+        } finally {
+          setDetailLoading(false);
+          setEmbedLoading(false);
+        }
+      }
+    }
+    setHasHydratedUrl(true);
+  }, [hasHydratedUrl]);
+
+  useEffect(() => {
+    if (!hasHydratedUrl) {
+      hydrateFromUrl();
+    }
+  }, [hasHydratedUrl, hydrateFromUrl]);
+
+  // Update URL pathname when screen state changes
+  useEffect(() => {
+    if (typeof window === 'undefined' || !hasHydratedUrl) return;
+
+    let newPath = '/';
+    if (screen && screen !== 'home') {
+      if (screen === 'detail' && detailAnime) {
+        newPath = `/anime/${detailAnime.id}-${makeSlug(detailAnime.judul)}`;
+      } else if (screen === 'player' && activeEpisode && detailAnime) {
+        const epIdx = episodes.findIndex(e => e.id === activeEpisode.id);
+        const epSlugSegment = epIdx !== -1 ? `ep-${epIdx + 1}` : `ep-${activeEpisode.id}`;
+        newPath = `/watch/${detailAnime.id}-${makeSlug(detailAnime.judul)}/${epSlugSegment}`;
+      } else if (screen === 'catalog') {
+        if (filterDay) {
+          newPath = `/catalog/day-${filterDay}`;
+        } else if (filterGenre) {
+          newPath = `/catalog/genre-${filterGenre}`;
+        } else {
+          newPath = `/catalog`;
+        }
+      } else {
+        newPath = `/${screen}`;
+      }
+    }
+
+    if (window.location.pathname !== newPath) {
+      window.history.pushState(null, '', newPath);
+    }
+  }, [screen, detailAnime, activeEpisode, filterDay, filterGenre, hasHydratedUrl]);
+
+  // Support browser Back/Forward navigation
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
+    const handlePopState = () => {
+      setHasHydratedUrl(false);
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
   const loadNextExplorePage = useCallback(async () => {
@@ -982,6 +475,8 @@ export default function App() {
         setJadwalOpen={setJadwalOpen}
         filterGenre={filterGenre}
         setFilterGenre={setFilterGenre}
+        filterDay={filterDay}
+        setFilterDay={setFilterDay}
         setSearchQ={setSearchQ}
         setFilterStatus={setFilterStatus}
         setFilterType={setFilterType}
@@ -1032,8 +527,54 @@ export default function App() {
               setFilterType={setFilterType}
               filterSort={filterSort}
               setFilterSort={setFilterSort}
+              filterDay={filterDay}
+              setFilterDay={setFilterDay}
               openDetail={openDetail}
             />
+          )}
+
+          {screen === 'ongoing' && (
+            <CatalogScreen 
+              searchQ={searchQ}
+              setSearchQ={setSearchQ}
+              setSearchInput={setSearchInput}
+              filterGenre={filterGenre}
+              setFilterGenre={setFilterGenre}
+              filterStatus={filterStatus}
+              setFilterStatus={setFilterStatus}
+              filterType={filterType}
+              setFilterType={setFilterType}
+              filterSort={filterSort}
+              setFilterSort={setFilterSort}
+              filterDay={filterDay}
+              setFilterDay={setFilterDay}
+              openDetail={openDetail}
+              mode="ongoing"
+            />
+          )}
+
+          {screen === 'popular' && (
+            <CatalogScreen 
+              searchQ={searchQ}
+              setSearchQ={setSearchQ}
+              setSearchInput={setSearchInput}
+              filterGenre={filterGenre}
+              setFilterGenre={setFilterGenre}
+              filterStatus={filterStatus}
+              setFilterStatus={setFilterStatus}
+              filterType={filterType}
+              setFilterType={setFilterType}
+              filterSort={filterSort}
+              setFilterSort={setFilterSort}
+              filterDay={filterDay}
+              setFilterDay={setFilterDay}
+              openDetail={openDetail}
+              mode="popular"
+            />
+          )}
+
+          {screen === 'schedule' && (
+            <ScheduleScreen openDetail={openDetail} />
           )}
 
           {screen === 'detail' && detailLoading && (
@@ -1198,15 +739,69 @@ export default function App() {
                         <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Menghubungkan ke server mirror LexAnime...</p>
                       </div>
                     ) : activeEmbed ? (
-                      <iframe
-                        key={activeEmbed.id}
-                        className="player-iframe"
-                        src={activeEmbed.link}
-                        allowFullScreen
-                        title="LexAnime Player"
-                        allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
-                        referrerPolicy="no-referrer"
-                      />
+                      (() => {
+                        const isVercelHost = typeof window !== 'undefined' && window.location.hostname.includes('vercel.app');
+                        if (isVercelHost && !forceIframe) {
+                          return (
+                            <div 
+                              className="player-empty" 
+                              style={{ 
+                                cursor: 'pointer', 
+                                background: 'radial-gradient(circle, #1e293b 0%, #0b0f19 100%)', 
+                                border: '2px dashed #38bdf8',
+                                padding: '40px 20px',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                              }}
+                              onClick={() => window.open(activeEmbed.link, '_blank')}
+                            >
+                              <div className="player-empty-icon" style={{ color: '#38bdf8', transform: 'scale(1.2)', textShadow: '0 0 15px rgba(56, 189, 248, 0.6)' }}>▶</div>
+                              <p style={{ color: '#f8fafc', fontWeight: 'bold', fontSize: '0.95rem', marginTop: 12, textAlign: 'center' }}>
+                                Klik di Sini untuk Menonton (Rekomendasi)
+                              </p>
+                              <p style={{ color: 'var(--text-muted)', fontSize: '0.75rem', marginTop: 8, padding: '0 20px', textAlign: 'center', lineHeight: '1.4' }}>
+                                Server video kami memblokir pemutaran langsung di web ini jika di-hosting di Vercel. Silakan klik tombol di bawah atau ketuk layar ini untuk menonton di tab baru secara lancar.
+                              </p>
+                              
+                              <div style={{ display: 'flex', gap: 10, marginTop: 15, flexWrap: 'wrap', justifyContent: 'center' }}>
+                                <button 
+                                  className="hero-btn" 
+                                  style={{ padding: '6px 14px', fontSize: '0.75rem', background: '#38bdf8', color: '#0f172a', fontWeight: 'bold', borderRadius: '4px', border: 'none' }}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    window.open(activeEmbed.link, '_blank');
+                                  }}
+                                >
+                                  Tonton di Tab Baru ↗
+                                </button>
+                                <button
+                                  className="hero-btn-secondary"
+                                  style={{ padding: '6px 14px', fontSize: '0.75rem', borderRadius: '4px', border: '1px solid #475569', color: '#cbd5e1', background: 'transparent' }}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setForceIframe(true);
+                                  }}
+                                >
+                                  Coba Putar di Web
+                                </button>
+                              </div>
+                            </div>
+                          );
+                        }
+                        return (
+                          <iframe
+                            key={activeEmbed.id}
+                            className="player-iframe"
+                            src={activeEmbed.link}
+                            allowFullScreen
+                            title="LexAnime Player"
+                            allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
+                            referrerPolicy="no-referrer"
+                          />
+                        );
+                      })()
                     ) : (
                       <div className="player-empty">
                         <div className="player-empty-icon">▶</div>
@@ -1214,7 +809,26 @@ export default function App() {
                       </div>
                     )}
                   </div>
-
+ 
+                  {/* Tips jika error */}
+                  {activeEmbed && (
+                    <div style={{ 
+                      marginTop: '12px', 
+                      marginBottom: '12px', 
+                      padding: '10px 14px', 
+                      background: 'var(--liquid-glass-bg)', 
+                      border: '1px solid var(--glass-border)',
+                      borderLeft: '4px solid var(--red)', 
+                      borderRadius: '8px', 
+                      fontSize: '0.75rem', 
+                      color: 'var(--text-main)', 
+                      lineHeight: '1.5' 
+                    }}>
+                      <p><strong>💡 TIPS PEMUTARAN VIDEO:</strong></p>
+                      <p style={{ marginTop: '4px' }}>1. <strong>Layar Hitam/Error di Web:</strong> Klik tombol <strong>Tonton Sekarang ↗</strong> di bawah untuk memutar video langsung di tab baru secara lancar.</p>
+                    </div>
+                  )}
+ 
                   {/* Player Quick Controls (Prev/Next Episode + Server Switcher) */}
                   <div className="embed-selector-card">
                     <div className="embed-selector-header">
@@ -1238,7 +852,7 @@ export default function App() {
                         </button>
                       </div>
                     </div>
-
+ 
                     {embeds.length > 0 ? (
                       <div className="quality-tabs-scroll">
                         {embeds.map(emb => (
@@ -1256,6 +870,32 @@ export default function App() {
                       <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
                         Tidak ada server mirror tambahan untuk episode ini.
                       </p>
+                    )}
+ 
+                    {activeEmbed && (
+                      <div style={{ marginTop: '12px', borderTop: '1px solid #2e3b4e', paddingTop: '12px', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
+                        <div style={{ display: 'flex', gap: 8 }}>
+                          {typeof window !== 'undefined' && window.location.hostname.includes('vercel.app') && (
+                            <button
+                              type="button"
+                              className="hero-btn-secondary"
+                              style={{ padding: '6px 12px', fontSize: '0.75rem', borderRadius: '4px', border: '1px solid #475569', color: '#cbd5e1' }}
+                              onClick={() => setForceIframe(!forceIframe)}
+                            >
+                              {forceIframe ? 'Ganti ke Tab Baru' : 'Coba Putar di Web'}
+                            </button>
+                          )}
+                          <a
+                            href={activeEmbed.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="hero-btn-secondary"
+                            style={{ padding: '6px 12px', fontSize: '0.75rem', textDecoration: 'none', borderRadius: '4px', background: '#38bdf8', color: '#0f172a', fontWeight: 'bold' }}
+                          >
+                            Tonton Sekarang ↗
+                          </a>
+                        </div>
+                      </div>
                     )}
                   </div>
                 </div>
@@ -1278,7 +918,7 @@ export default function App() {
           )}
 
           {screen === 'bookmarks' && (
-            <div>
+            <div className="section-block">
               <div className="screen-header">
                 <span>Bookmark LexAnime</span>
               </div>
@@ -1297,7 +937,7 @@ export default function App() {
           )}
 
           {screen === 'history' && (
-            <div>
+            <div className="section-block">
               <div className="screen-header">
                 <span>Riwayat Tonton LexAnime</span>
                 {history.length > 0 && (

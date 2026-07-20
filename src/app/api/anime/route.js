@@ -9,6 +9,7 @@ export async function GET(request) {
     const status_filter = (searchParams.get('status') || '').trim();
     const genre_filter = (searchParams.get('genre') || '').trim();
     const type_filter = (searchParams.get('type') || '').trim();
+    const hari_filter = (searchParams.get('hari') || '').trim();
     const sort_filter = (searchParams.get('sort') || 'latest').trim();
     const page = parseInt(searchParams.get('page') || '1', 10);
     const limit = parseInt(searchParams.get('limit') || '20', 10);
@@ -32,6 +33,10 @@ export async function GET(request) {
     if (type_filter) {
       conditions.push("tipe = ?");
       params.push(type_filter);
+    }
+    if (hari_filter) {
+      conditions.push("hari_tayang = ?");
+      params.push(hari_filter);
     }
 
     const where_clause = " WHERE " + conditions.join(" AND ");
@@ -62,6 +67,7 @@ export async function GET(request) {
       produser: row.produser,
       tipe: row.tipe,
       status: row.status,
+      hari_tayang: row.hari_tayang,
       total_episode: row.total_episode,
       durasi: row.durasi,
       tanggal_rilis: row.tanggal_rilis,
